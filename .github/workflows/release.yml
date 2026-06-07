@@ -1,0 +1,60 @@
+name: Release DMG
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-dmg:
+    name: Build and upload DMG (${{ matrix.label }})
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            label: apple-silicon
+          - arch: x86_64
+            label: intel
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Python dependencies
+        run: python3 -m pip install --upgrade pillow
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          VERSION="${TAG#v}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Run tests
+        run: |
+          env \
+            CLANG_MODULE_CACHE_PATH=/private/tmp/masklet-clang-cache \
+            SWIFTPM_CACHE_PATH=/private/tmp/masklet-swiftpm-cache \
+            swift test
+
+      - name: Build DMG
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          BUNDLE_VERSION: ${{ github.run_number }}
+          ARCH: ${{ matrix.arch }}
+        run: ./scripts/package_dmg.sh
+
+      - name: Upload DMG to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+          LABEL: ${{ matrix.label }}
+        run: |
+          gh release upload "$TAG" "dist/Masklet-${VERSION}-${LABEL}.dmg" --clobber
