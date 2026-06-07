@@ -30,6 +30,46 @@ func keepsPublicURLsByDefault() {
 }
 
 @Test
+func treatsLoopbackURLHostAsLocal() {
+    let sanitizer = ClipboardSanitizer()
+    var settings = AppSettings()
+    settings.redactIPv4 = false
+
+    let result = sanitizer.sanitize("curl http://127.0.0.1:8080/health", settings: settings)
+
+    #expect(result.text == "curl http://<IP_A>:8080/health")
+    #expect(result.mappings.contains { $0.original == "127.0.0.1" && $0.replacement == "<IP_A>" })
+}
+
+@Test
+func keepsLocalIPv4WhenLocalRuleIsDisabled() {
+    let sanitizer = ClipboardSanitizer()
+    var settings = AppSettings()
+    settings.redactIPv4 = true
+    settings.redactLocalIPv4 = false
+
+    let result = sanitizer.sanitize("curl http://127.0.0.1:8080 && ping 8.8.8.8", settings: settings)
+
+    #expect(result.text == "curl http://127.0.0.1:8080 && ping <IP_A>")
+    #expect(result.mappings.contains { $0.original == "8.8.8.8" && $0.replacement == "<IP_A>" })
+    #expect(!result.mappings.contains { $0.original == "127.0.0.1" })
+}
+
+@Test
+func keepsPublicIPv4WhenPublicRuleIsDisabled() {
+    let sanitizer = ClipboardSanitizer()
+    var settings = AppSettings()
+    settings.redactIPv4 = false
+    settings.redactLocalIPv4 = true
+
+    let result = sanitizer.sanitize("curl http://127.0.0.1:8080 && ping 8.8.8.8", settings: settings)
+
+    #expect(result.text == "curl http://<IP_A>:8080 && ping 8.8.8.8")
+    #expect(result.mappings.contains { $0.original == "127.0.0.1" && $0.replacement == "<IP_A>" })
+    #expect(!result.mappings.contains { $0.original == "8.8.8.8" })
+}
+
+@Test
 func restoresAliasesFromReturnedAICommand() {
     let sanitizer = ClipboardSanitizer()
     let original = "curl http://10.2.3.4:8080/api -H 'Authorization: Bearer abcdefghijklmnopqrstuvwxyz'"

@@ -31,6 +31,8 @@ enum L10n {
         case sensitiveData
         case ipv4
         case ipv4Subtitle
+        case localIPv4
+        case localIPv4Subtitle
         case ipv6
         case ipv6Subtitle
         case internalURLHosts
@@ -107,12 +109,14 @@ enum L10n {
         .autoRestoreFromTargets: "Restore when copying back from target apps",
         .autoRestoreFromTargetsSubtitle: "When commands containing placeholders are copied from ChatGPT, browsers, or other target apps, restore the original values.",
         .sensitiveData: "Sensitive data",
-        .ipv4: "IPv4 addresses",
-        .ipv4Subtitle: "For example, 10.2.3.4 becomes <IP_A>.",
+        .ipv4: "Public IPv4 addresses",
+        .ipv4Subtitle: "Public addresses such as 8.8.8.8 become <IP_A>.",
+        .localIPv4: "Local/private IPv4 addresses",
+        .localIPv4Subtitle: "Controls 127.0.0.1, 10.x.x.x, 172.16-31.x.x, 192.168.x.x, and 169.254.x.x.",
         .ipv6: "IPv6 addresses",
         .ipv6Subtitle: "Include IPv6 addresses in the same <IP_A> mapping set.",
         .internalURLHosts: "Internal URL hosts",
-        .internalURLHostsSubtitle: "Handles localhost, .local, .internal, .corp, and IP hosts.",
+        .internalURLHostsSubtitle: "Handles localhost, .local, .internal, and .corp hostnames.",
         .credentials: "password / passwd / pwd",
         .credentialsSubtitle: "Password values become reversible placeholders such as <PASSWORD_A> by default.",
         .tokens: "Token / API Key / Secret",
@@ -185,12 +189,14 @@ enum L10n {
         .autoRestoreFromTargets: "从目标应用复制回来时自动还原",
         .autoRestoreFromTargetsSubtitle: "从 ChatGPT、浏览器等目标应用复制包含占位符的命令时，自动恢复为原始值。",
         .sensitiveData: "敏感信息",
-        .ipv4: "IPv4 地址",
-        .ipv4Subtitle: "例如 10.2.3.4 会替换为 <IP_A>。",
+        .ipv4: "公网 IPv4 地址",
+        .ipv4Subtitle: "例如 8.8.8.8 会替换为 <IP_A>。",
+        .localIPv4: "本地/私有 IPv4 地址",
+        .localIPv4Subtitle: "控制 127.0.0.1、10.x.x.x、172.16-31.x.x、192.168.x.x 和 169.254.x.x。",
         .ipv6: "IPv6 地址",
         .ipv6Subtitle: "将 IPv6 地址纳入同一套 <IP_A> 映射。",
         .internalURLHosts: "URL 中的内部主机",
-        .internalURLHostsSubtitle: "处理 localhost、.local、.internal、.corp 和 IP host。",
+        .internalURLHostsSubtitle: "处理 localhost、.local、.internal 和 .corp 主机名。",
         .credentials: "password / passwd / pwd",
         .credentialsSubtitle: "密码值默认替换为可还原的 <PASSWORD_A>。",
         .tokens: "Token / API Key / Secret",

@@ -47,13 +47,8 @@ final class ClipboardSanitizer {
             collectedMappings.append(contentsOf: urlResult.mappings)
         }
 
-        if settings.redactIPv4 {
-            let ipv4Result = replacePattern(
-                in: output,
-                kind: "IPv4",
-                pattern: #"\b(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\b"#,
-                settings: settings
-            )
+        if settings.redactIPv4 || settings.redactLocalIPv4 {
+            let ipv4Result = replaceIPv4Addresses(in: output, settings: settings)
             output = ipv4Result.text
             replacementCount += ipv4Result.count
             collectedMappings.append(contentsOf: ipv4Result.mappings)
@@ -142,6 +137,23 @@ final class ClipboardSanitizer {
                 mappings.append(SensitiveMapping(kind: "Password", original: original, replacement: replacement))
             }
             return "\(source[keyRange])\(source[sepRange])\(replacement)"
+        }
+        return (result.text, result.count, mappings)
+    }
+
+    private func replaceIPv4Addresses(in text: String, settings: AppSettings) -> (text: String, count: Int, mappings: [SensitiveMapping]) {
+        let pattern = #"\b(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\b"#
+        var mappings: [SensitiveMapping] = []
+        let result = replaceWithRegex(in: text, pattern: pattern) { [weak self] match, source in
+            guard let self, let range = Range(match.range, in: source) else { return nil }
+            let original = String(source[range])
+            let isLocal = isLocalOrPrivateIPv4(original)
+            guard (isLocal && settings.redactLocalIPv4) || (!isLocal && settings.redactIPv4) else {
+                return nil
+            }
+            let replacement = networkAlias(for: original)
+            mappings.append(SensitiveMapping(kind: isLocal ? "Local IPv4" : "IPv4", original: original, replacement: replacement))
+            return replacement
         }
         return (result.text, result.count, mappings)
     }
@@ -402,9 +414,21 @@ final class ClipboardSanitizer {
     }
 
     private func shouldAliasURLHost(_ host: String) -> Bool {
-        if host.lowercased() == "localhost" { return true }
-        if host.range(of: #"^\d{1,3}(?:\.\d{1,3}){3}$"#, options: .regularExpression) != nil { return true }
-        return host.contains(".internal") || host.contains(".local") || host.contains(".corp")
+        let normalizedHost = host.lowercased()
+        if normalizedHost == "localhost" { return true }
+        return normalizedHost.contains(".internal") || normalizedHost.contains(".local") || normalizedHost.contains(".corp")
+    }
+
+    private func isLocalOrPrivateIPv4(_ address: String) -> Bool {
+        let parts = address.split(separator: ".").compactMap { Int($0) }
+        guard parts.count == 4 else { return false }
+
+        if parts[0] == 10 { return true }
+        if parts[0] == 127 { return true }
+        if parts[0] == 169 && parts[1] == 254 { return true }
+        if parts[0] == 172 && (16...31).contains(parts[1]) { return true }
+        if parts[0] == 192 && parts[1] == 168 { return true }
+        return false
     }
 
     private func expireMappingsIfNeeded(limit: Int) {

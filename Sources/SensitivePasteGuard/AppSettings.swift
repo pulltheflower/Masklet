@@ -11,6 +11,7 @@ struct AppSettings: Codable, Equatable {
     var language: AppLanguage = .english
     var isEnabled = true
     var redactIPv4 = true
+    var redactLocalIPv4 = true
     var redactIPv6 = true
     var redactURLs = true
     var redactCredentials = true
@@ -38,6 +39,7 @@ struct AppSettings: Codable, Equatable {
         language = try container.decodeIfPresent(AppLanguage.self, forKey: .language) ?? .english
         isEnabled = try container.decodeIfPresent(Bool.self, forKey: .isEnabled) ?? true
         redactIPv4 = try container.decodeIfPresent(Bool.self, forKey: .redactIPv4) ?? true
+        redactLocalIPv4 = try container.decodeIfPresent(Bool.self, forKey: .redactLocalIPv4) ?? true
         redactIPv6 = try container.decodeIfPresent(Bool.self, forKey: .redactIPv6) ?? true
         redactURLs = try container.decodeIfPresent(Bool.self, forKey: .redactURLs) ?? true
         redactCredentials = try container.decodeIfPresent(Bool.self, forKey: .redactCredentials) ?? true

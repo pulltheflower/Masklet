@@ -117,6 +117,8 @@ struct SettingsView: View {
             settingsGroup(t(.sensitiveData)) {
                 ToggleRow(title: t(.ipv4), subtitle: t(.ipv4Subtitle), isOn: $settingsStore.settings.redactIPv4)
                 Divider()
+                ToggleRow(title: t(.localIPv4), subtitle: t(.localIPv4Subtitle), isOn: $settingsStore.settings.redactLocalIPv4)
+                Divider()
                 ToggleRow(title: t(.ipv6), subtitle: t(.ipv6Subtitle), isOn: $settingsStore.settings.redactIPv6)
                 Divider()
                 ToggleRow(title: t(.internalURLHosts), subtitle: t(.internalURLHostsSubtitle), isOn: $settingsStore.settings.redactURLs)
