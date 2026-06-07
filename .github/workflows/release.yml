@@ -51,7 +51,9 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
           BUNDLE_VERSION: ${{ github.run_number }}
           ARCH: ${{ matrix.arch }}
-        run: ./scripts/package_dmg.sh
+        run: |
+          source venv/bin/activate
+          ./scripts/package_dmg.sh
 
       - name: Upload DMG to release
         env:

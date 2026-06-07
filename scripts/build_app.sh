@@ -39,9 +39,8 @@ else
   BIN_DIR=".build/release"
 fi
 if [ -z "${PYTHON_BIN:-}" ]; then
-  BUNDLED_PYTHON="/Users/zzh/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3"
-  if [ -x "${BUNDLED_PYTHON}" ]; then
-    PYTHON_BIN="${BUNDLED_PYTHON}"
+  if [ -x "./venv/bin/python3" ]; then
+    PYTHON_BIN="./venv/bin/python3"
   else
     PYTHON_BIN="python3"
   fi
