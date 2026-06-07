@@ -34,10 +34,25 @@ final class ClipboardSanitizer {
         }
 
         if settings.redactTokens {
-            let tokenResult = replaceTokens(in: output, settings: settings)
-            output = tokenResult.text
-            replacementCount += tokenResult.count
-            collectedMappings.append(contentsOf: tokenResult.mappings)
+            let keyedResult = replaceKeyedSecret(in: output, settings: settings)
+            output = keyedResult.text
+            replacementCount += keyedResult.count
+            collectedMappings.append(contentsOf: keyedResult.mappings)
+
+            let bearerResult = replaceBearerToken(in: output, settings: settings)
+            output = bearerResult.text
+            replacementCount += bearerResult.count
+            collectedMappings.append(contentsOf: bearerResult.mappings)
+
+            let githubResult = replaceGitHubToken(in: output, settings: settings)
+            output = githubResult.text
+            replacementCount += githubResult.count
+            collectedMappings.append(contentsOf: githubResult.mappings)
+
+            let awsResult = replaceAWSKey(in: output, settings: settings)
+            output = awsResult.text
+            replacementCount += awsResult.count
+            collectedMappings.append(contentsOf: awsResult.mappings)
         }
 
         if settings.redactURLs {
@@ -158,18 +173,9 @@ final class ClipboardSanitizer {
         return (result.text, result.count, mappings)
     }
 
-    private func replaceTokens(in text: String, settings: AppSettings) -> (text: String, count: Int, mappings: [SensitiveMapping]) {
-        var output = text
-        var count = 0
-        var mappings: [SensitiveMapping] = []
-
-        let keyedSecret = replaceKeyedSecret(in: output, settings: settings)
-        output = keyedSecret.text
-        count += keyedSecret.count
-        mappings.append(contentsOf: keyedSecret.mappings)
-
-        let bearer = replaceCapturedSecret(
-            in: output,
+    private func replaceBearerToken(in text: String, settings: AppSettings) -> (text: String, count: Int, mappings: [SensitiveMapping]) {
+        replaceCapturedSecret(
+            in: text,
             kind: "Token",
             prefix: "TOKEN",
             pattern: #"(?i)\bBearer\s+([A-Za-z0-9._~+/=-]{12,})"#,
@@ -177,35 +183,28 @@ final class ClipboardSanitizer {
             fallback: "<REDACTED_TOKEN>",
             settings: settings
         )
-        output = bearer.text
-        count += bearer.count
-        mappings.append(contentsOf: bearer.mappings)
+    }
 
-        let github = replaceWholeSecret(
-            in: output,
+    private func replaceGitHubToken(in text: String, settings: AppSettings) -> (text: String, count: Int, mappings: [SensitiveMapping]) {
+        replaceWholeSecret(
+            in: text,
             kind: "GitHub Token",
             prefix: "GITHUB_TOKEN",
             pattern: #"\bgh[pousr]_[A-Za-z0-9_]{20,}\b"#,
             fallback: "<REDACTED_GITHUB_TOKEN>",
             settings: settings
         )
-        output = github.text
-        count += github.count
-        mappings.append(contentsOf: github.mappings)
+    }
 
-        let aws = replaceWholeSecret(
-            in: output,
+    private func replaceAWSKey(in text: String, settings: AppSettings) -> (text: String, count: Int, mappings: [SensitiveMapping]) {
+        replaceWholeSecret(
+            in: text,
             kind: "AWS Access Key",
             prefix: "AWS_ACCESS_KEY",
             pattern: #"\bAKIA[0-9A-Z]{16}\b"#,
             fallback: "<REDACTED_AWS_ACCESS_KEY>",
             settings: settings
         )
-        output = aws.text
-        count += aws.count
-        mappings.append(contentsOf: aws.mappings)
-
-        return (output, count, mappings)
     }
 
     private func replaceKeyedSecret(in text: String, settings: AppSettings) -> (text: String, count: Int, mappings: [SensitiveMapping]) {
