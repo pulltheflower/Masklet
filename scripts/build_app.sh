@@ -1,5 +1,5 @@
 #!/bin/sh
-set -eu
+set -eux
 
 APP_NAME="Masklet"
 EXECUTABLE_NAME="SensitivePasteGuard"

@@ -31,7 +31,7 @@ DMG_NAME="${APP_NAME}-${VERSION}${DMG_ARCH_SUFFIX}.dmg"
 DMG_PATH="${DIST_DIR}/${DMG_NAME}"
 STAGING_DIR=".build/dmg/${BUILD_ARCH_DIR}/${DISPLAY_NAME}"
 
-ARCH="${ARCH}" ./scripts/build_app.sh >/dev/null
+ARCH="${ARCH}" ./scripts/build_app.sh
 
 rm -rf "${STAGING_DIR}"
 mkdir -p "${STAGING_DIR}" "${DIST_DIR}"
