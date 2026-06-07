@@ -32,11 +32,16 @@ MACOS_DIR="${CONTENTS_DIR}/MacOS"
 RESOURCES_DIR="${CONTENTS_DIR}/Resources"
 
 if [ -n "${TRIPLE}" ]; then
+  swift build -c release --triple "${TRIPLE}"
   BIN_DIR="$(swift build -c release --triple "${TRIPLE}" --show-bin-path)"
 else
   swift build -c release
   BIN_DIR=".build/release"
 fi
+
+echo "BIN_DIR=${BIN_DIR}" >&2
+ls -la "${BIN_DIR}/" >&2
+
 if [ -z "${PYTHON_BIN:-}" ]; then
   if [ -x "./venv/bin/python3" ]; then
     PYTHON_BIN="./venv/bin/python3"
@@ -48,7 +53,13 @@ fi
 
 rm -rf "${BUNDLE_DIR}"
 mkdir -p "${MACOS_DIR}" "${RESOURCES_DIR}"
-cp "${BIN_DIR}/${EXECUTABLE_NAME}" "${MACOS_DIR}/${APP_NAME}"
+
+BINARY_PATH="${BIN_DIR}/${EXECUTABLE_NAME}"
+if [ ! -f "${BINARY_PATH}" ]; then
+  echo "ERROR: Binary not found at ${BINARY_PATH}" >&2
+  exit 1
+fi
+cp "${BINARY_PATH}" "${MACOS_DIR}/${APP_NAME}"
 cp "Resources/Icons/AppIcon.icns" "${RESOURCES_DIR}/AppIcon.icns"
 cp "Resources/Icons/MenuBarIcon.png" "${RESOURCES_DIR}/MenuBarIcon.png"
 
