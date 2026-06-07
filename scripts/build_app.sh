@@ -32,10 +32,9 @@ MACOS_DIR="${CONTENTS_DIR}/MacOS"
 RESOURCES_DIR="${CONTENTS_DIR}/Resources"
 
 if [ -n "${TRIPLE}" ]; then
-  env CLANG_MODULE_CACHE_PATH="${CLANG_MODULE_CACHE_PATH:-/private/tmp/masklet-clang-cache}" SWIFTPM_CACHE_PATH="${SWIFTPM_CACHE_PATH:-/private/tmp/masklet-swiftpm-cache}" swift build -c release --triple "${TRIPLE}"
-  BIN_DIR="$(env CLANG_MODULE_CACHE_PATH="${CLANG_MODULE_CACHE_PATH:-/private/tmp/masklet-clang-cache}" SWIFTPM_CACHE_PATH="${SWIFTPM_CACHE_PATH:-/private/tmp/masklet-swiftpm-cache}" swift build -c release --triple "${TRIPLE}" --show-bin-path)"
+  BIN_DIR="$(swift build -c release --triple "${TRIPLE}" --show-bin-path)"
 else
-  env CLANG_MODULE_CACHE_PATH="${CLANG_MODULE_CACHE_PATH:-/private/tmp/masklet-clang-cache}" SWIFTPM_CACHE_PATH="${SWIFTPM_CACHE_PATH:-/private/tmp/masklet-swiftpm-cache}" swift build -c release
+  swift build -c release
   BIN_DIR=".build/release"
 fi
 if [ -z "${PYTHON_BIN:-}" ]; then

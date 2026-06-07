@@ -40,11 +40,7 @@ jobs:
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Run tests
-        run: |
-          env \
-            CLANG_MODULE_CACHE_PATH=/private/tmp/masklet-clang-cache \
-            SWIFTPM_CACHE_PATH=/private/tmp/masklet-swiftpm-cache \
-            swift test
+        run: swift test
 
       - name: Build DMG
         env:
