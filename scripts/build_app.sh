@@ -96,4 +96,6 @@ cat > "${CONTENTS_DIR}/Info.plist" <<PLIST
 </plist>
 PLIST
 
+codesign --force --deep --sign - "${BUNDLE_DIR}"
+
 echo "${BUNDLE_DIR}"
